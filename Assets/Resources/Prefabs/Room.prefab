@@ -68,7 +68,7 @@ GameObject:
   - component: {fileID: 9157990774112357946}
   - component: {fileID: 2927355637367235099}
   - component: {fileID: 7114946535035034212}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Corner_LeftTop
   m_TagString: Wall
   m_Icon: {fileID: 0}
@@ -282,7 +282,7 @@ GameObject:
   - component: {fileID: 7769768397753696259}
   - component: {fileID: 2094422544292616206}
   - component: {fileID: 8913529777954928371}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Corner_RightBottom
   m_TagString: Wall
   m_Icon: {fileID: 0}
@@ -412,7 +412,7 @@ GameObject:
   - component: {fileID: 2439389943500006978}
   - component: {fileID: 2293227098799307320}
   - component: {fileID: 554693729164920259}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Top
   m_TagString: Wall
   m_Icon: {fileID: 0}
@@ -542,7 +542,7 @@ GameObject:
   - component: {fileID: 6577198614482817986}
   - component: {fileID: 4491893159671278798}
   - component: {fileID: 8994802598090853502}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Corner_RightTop
   m_TagString: Wall
   m_Icon: {fileID: 0}
@@ -672,7 +672,7 @@ GameObject:
   - component: {fileID: 227707523175383017}
   - component: {fileID: 1367936216358691264}
   - component: {fileID: 1028025244106456713}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Corner_LeftBottom
   m_TagString: Wall
   m_Icon: {fileID: 0}
@@ -802,7 +802,7 @@ GameObject:
   - component: {fileID: 1681958286343345226}
   - component: {fileID: 3228009508462219229}
   - component: {fileID: 325695466572490039}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Left
   m_TagString: Wall
   m_Icon: {fileID: 0}
@@ -932,7 +932,7 @@ GameObject:
   - component: {fileID: 2783894945491472217}
   - component: {fileID: 6355699575390161449}
   - component: {fileID: 6742814389718475336}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bottom
   m_TagString: Wall
   m_Icon: {fileID: 0}
@@ -1062,7 +1062,7 @@ GameObject:
   - component: {fileID: 7186214539555454002}
   - component: {fileID: 3018984912967183420}
   - component: {fileID: 2151651764562966305}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Right
   m_TagString: Wall
   m_Icon: {fileID: 0}

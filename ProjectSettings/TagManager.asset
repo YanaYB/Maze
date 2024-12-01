@@ -7,6 +7,8 @@ TagManager:
   - Boost
   - Exit
   - Wall
+  - Buter
+  - Olivka
   layers:
   - Default
   - TransparentFX
@@ -14,9 +16,9 @@ TagManager:
   - Player
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Obstacle
+  - NoCollision
+  - Buter
   - 
   - 
   - 

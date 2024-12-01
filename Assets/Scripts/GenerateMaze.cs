@@ -1,8 +1,9 @@
-using TMPro;  // Подключение библиотеки TextMeshPro
+using TMPro;  // РџРѕРґРєР»СЋС‡РµРЅРёРµ Р±РёР±Р»РёРѕС‚РµРєРё TextMeshPro
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Pathfinding;
 
 public class GenerateMaze : MonoBehaviour
 {
@@ -13,11 +14,14 @@ public class GenerateMaze : MonoBehaviour
     private GameObject exitPrefab;
 
     [SerializeField]
-    GameObject playerPrefab;  // Префаб игрока
-    private GameObject player; // Ссылка на игрока
+    GameObject playerPrefab;  // РџСЂРµС„Р°Р± РёРіСЂРѕРєР°
+    private GameObject player; // РЎСЃС‹Р»РєР° РЅР° РёРіСЂРѕРєР°
 
     [SerializeField]
-    GameObject[] boostPrefab;   // Префаб буста
+    GameObject[] boostPrefab;   // РџСЂРµС„Р°Р± Р±СѓСЃС‚Р°
+    
+    [SerializeField] private GameObject buter;
+    [SerializeField] private int buterAmount = 10;
 
     // The grid.
     Room[,] rooms = null;
@@ -34,10 +38,10 @@ public class GenerateMaze : MonoBehaviour
     // The stack for backtracking.
     Stack<Room> stack = new Stack<Room>();
 
-    // Позиция лабиринта на сцене (можно настроить)
-    public Vector2 mazePosition = new Vector2(0, 0);  // Центр лабиринта
+    // РџРѕР·РёС†РёСЏ Р»Р°Р±РёСЂРёРЅС‚Р° РЅР° СЃС†РµРЅРµ (РјРѕР¶РЅРѕ РЅР°СЃС‚СЂРѕРёС‚СЊ)
+    public Vector2 mazePosition = new Vector2(0, 0);  // Р¦РµРЅС‚СЂ Р»Р°Р±РёСЂРёРЅС‚Р°
 
-    // Камера, которая будет следовать за игроком
+    // РљР°РјРµСЂР°, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ СЃР»РµРґРѕРІР°С‚СЊ Р·Р° РёРіСЂРѕРєРѕРј
     public CameraFollow cameraFollow;
 
     public static GenerateMaze Instance { get; private set; }
@@ -90,13 +94,16 @@ public class GenerateMaze : MonoBehaviour
 
         rooms = new Room[numX, numY];
 
+        var roomsHolder = new GameObject("Rooms");
+        roomsHolder.transform.parent = transform;
+        
         for (int i = 0; i < numX; ++i)
         {
             for (int j = 0; j < numY; ++j)
             {
-                // Генерируем комнаты в пределах лабиринта
+                // Р“РµРЅРµСЂРёСЂСѓРµРј РєРѕРјРЅР°С‚С‹ РІ РїСЂРµРґРµР»Р°С… Р»Р°Р±РёСЂРёРЅС‚Р°
                 Vector3 roomPosition = new Vector3(mazePosition.x + i * roomWidth, mazePosition.y + j * roomHeight, 0.0f);
-                GameObject room = Instantiate(roomPrefab, roomPosition, Quaternion.identity);
+                GameObject room = Instantiate(roomPrefab, roomPosition, Quaternion.identity, roomsHolder.transform);
 
                 room.name = "Room_" + i.ToString() + "_" + j.ToString();
                 rooms[i, j] = room.GetComponent<Room>();
@@ -104,47 +111,84 @@ public class GenerateMaze : MonoBehaviour
             }
         }
 
-        SetCamera();  // Устанавливаем начальную позицию камеры
+        SetCamera();  // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅР°С‡Р°Р»СЊРЅСѓСЋ РїРѕР·РёС†РёСЋ РєР°РјРµСЂС‹
 
         CreateMaze();
+        
+        // updating obstacles
+        AstarPath.active.Scan();
+        
 
-        // Устанавливаем игрока в центр лабиринта
+        // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РёРіСЂРѕРєР° РІ С†РµРЅС‚СЂ Р»Р°Р±РёСЂРёРЅС‚Р°
         Vector3 playerStartPos = new Vector3(mazePosition.x + (numX / 2) * roomWidth, mazePosition.y + (numY / 2) * roomHeight, 0);
         player = Instantiate(playerPrefab, playerStartPos, Quaternion.identity);
         player.name = "Player";
 
-        // Связываем камеру с игроком
+        // РЎРІСЏР·С‹РІР°РµРј РєР°РјРµСЂСѓ СЃ РёРіСЂРѕРєРѕРј
         if (cameraFollow != null)
         {
             cameraFollow.player = player.transform;
         }
 
-        // Создаем бусты
+        // РЎРѕР·РґР°РµРј Р±СѓСЃС‚С‹
         CreateBoosts();
+        
+        //creating buters
+        CreateButers(buterAmount);
+        
+        
     }
 
     private void CreateBoosts()
     {
-        // Количество бустов, которое нужно создать (например, 3)
+        // РљРѕР»РёС‡РµСЃС‚РІРѕ Р±СѓСЃС‚РѕРІ, РєРѕС‚РѕСЂРѕРµ РЅСѓР¶РЅРѕ СЃРѕР·РґР°С‚СЊ (РЅР°РїСЂРёРјРµСЂ, 3)
         int boostCountToCreate = 3;
-
+        
+        var boostsHolder = new GameObject("Boosts");
+        boostsHolder.transform.parent = transform;
+        
         for (int i = 0; i < boostCountToCreate; i++)
         {
-            // Случайно выбираем координаты комнаты для буста
+            // РЎР»СѓС‡Р°Р№РЅРѕ РІС‹Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєРѕРјРЅР°С‚С‹ РґР»СЏ Р±СѓСЃС‚Р°
             int x = UnityEngine.Random.Range(0, numX);
             int y = UnityEngine.Random.Range(0, numY);
 
-            // Случайно выбираем один из префабов бустов
+            // РЎР»СѓС‡Р°Р№РЅРѕ РІС‹Р±РёСЂР°РµРј РѕРґРёРЅ РёР· РїСЂРµС„Р°Р±РѕРІ Р±СѓСЃС‚РѕРІ
             GameObject boostPrefabToUse = boostPrefab[i];
 
-            // Устанавливаем буст в случайную комнату
+            // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р±СѓСЃС‚ РІ СЃР»СѓС‡Р°Р№РЅСѓСЋ РєРѕРјРЅР°С‚Сѓ
             Vector3 boostPosition = new Vector3(mazePosition.x + x * roomWidth, mazePosition.y + y * roomHeight, 0.0f);
-            GameObject boost = Instantiate(boostPrefabToUse, boostPosition, Quaternion.identity);
+            GameObject boost = Instantiate(boostPrefabToUse, boostPosition, Quaternion.identity, boostsHolder.transform);
             boost.name = "Boost_" + x.ToString() + "_" + y.ToString();
         }
     }
 
+    private void CreateButers(int amount)
+    {
+        var butersHolder = new GameObject("Buters");
+        butersHolder.transform.parent = transform;
+        
+        for (int i = 0; i < amount; i++)
+        {
+            CreateButer(butersHolder.transform);
+        }
+    }
 
+    private void CreateButer(Transform parent)
+    {
+            // РЎР»СѓС‡Р°Р№РЅРѕ РІС‹Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєРѕРјРЅР°С‚С‹ РґР»СЏ buter
+            int x = UnityEngine.Random.Range(0, numX);
+            int y = UnityEngine.Random.Range(0, numY);
+            
+            // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј buter РІ СЃР»СѓС‡Р°Р№РЅСѓСЋ РєРѕРјРЅР°С‚Сѓ
+            Vector3 buterPosition = new Vector3(mazePosition.x + x * roomWidth, mazePosition.y + y * roomHeight, 0.0f);
+            GameObject newButer = Instantiate(buter, buterPosition, Quaternion.identity, parent);
+            newButer.name = "Buter_" + x.ToString() + "_" + y.ToString();
+
+            var destination = newButer.GetComponent<AIDestinationSetter>();
+            destination.target = player.transform;
+            
+    }
 
     public void RemoveRoomWall(int x, int y, Room.Directions dir)
     {
@@ -281,26 +325,26 @@ public class GenerateMaze : MonoBehaviour
 
     public void OpenExit()
     {
-        // Удаляем стену справа от последней комнаты
+        // РЈРґР°Р»СЏРµРј СЃС‚РµРЅСѓ СЃРїСЂР°РІР° РѕС‚ РїРѕСЃР»РµРґРЅРµР№ РєРѕРјРЅР°С‚С‹
         RemoveRoomWall(numX - 1, numY - 1, Room.Directions.RIGHT);
 
-        // Рассчитываем позицию и поворот для объекта Exit
+        // Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј РїРѕР·РёС†РёСЋ Рё РїРѕРІРѕСЂРѕС‚ РґР»СЏ РѕР±СЉРµРєС‚Р° Exit
         Vector3 wallPosition = new Vector3(
-            mazePosition.x + (numX - 1) * roomWidth + roomWidth / 2,  // Положение справа от последней комнаты
+            mazePosition.x + (numX - 1) * roomWidth + roomWidth / 2,  // РџРѕР»РѕР¶РµРЅРёРµ СЃРїСЂР°РІР° РѕС‚ РїРѕСЃР»РµРґРЅРµР№ РєРѕРјРЅР°С‚С‹
             mazePosition.y + (numY - 1) * roomHeight,
             0.0f
         );
-        Quaternion wallRotation = Quaternion.identity; // Используем стандартный поворот (можно изменить при необходимости)
+        Quaternion wallRotation = Quaternion.identity; // РСЃРїРѕР»СЊР·СѓРµРј СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РїРѕРІРѕСЂРѕС‚ (РјРѕР¶РЅРѕ РёР·РјРµРЅРёС‚СЊ РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё)
 
-        // Создаем объект Exit на месте удаленной стены
+        // РЎРѕР·РґР°РµРј РѕР±СЉРµРєС‚ Exit РЅР° РјРµСЃС‚Рµ СѓРґР°Р»РµРЅРЅРѕР№ СЃС‚РµРЅС‹
         if (exitPrefab != null)
         {
             Instantiate(exitPrefab, wallPosition, wallRotation);
-            Debug.Log("Выход открыт!");
+            Debug.Log("Р’С‹С…РѕРґ РѕС‚РєСЂС‹С‚!");
         }
         else
         {
-            Debug.LogError("Префаб выхода (exitPrefab) не назначен.");
+            Debug.LogError("РџСЂРµС„Р°Р± РІС‹С…РѕРґР° (exitPrefab) РЅРµ РЅР°Р·РЅР°С‡РµРЅ.");
         }
     }
 

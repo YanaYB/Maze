@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
@@ -15,7 +16,15 @@ public class PlayerController : MonoBehaviour
 
     // Добавляем переменную для хранения количества собранных бустов
     private int boostCount = 0;
-    [SerializeField] private TextMeshProUGUI boostCountText;  // UI TextMeshProUGUI для отображения счетчика
+    private TextMeshProUGUI boostCountText;  // UI TextMeshProUGUI для отображения счетчика
+
+    [SerializeField] private GameObject olivka;
+    [SerializeField] private float throwForce;
+    [SerializeField] private int olivkaCount = 30;
+    [SerializeField] private Transform[] shotPositions;
+    private int currentShotPosition;
+    private TextMeshProUGUI olivkaCountText;  // UI TextMeshProUGUI для отображения счетчика
+    private Vector2 lookingAt;
 
     private void Awake()
     {
@@ -36,6 +45,8 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerCollider = GetComponent<BoxCollider2D>();
 
+        lookingAt = new Vector2(0, -1);
+
         // Найти текстовый объект на Canvas
         if (boostCountText == null)
         {
@@ -45,13 +56,22 @@ public class PlayerController : MonoBehaviour
                 Debug.LogError("BoostCountText не найден. Убедитесь, что объект с таким именем существует на Canvas.");
             }
         }
+        if (olivkaCountText == null)
+        {
+            olivkaCountText = GameObject.Find("OlivkaCountText").GetComponent<TextMeshProUGUI>();
+            if (olivkaCountText == null)
+            {
+                Debug.LogError("OlivkaCountText не найден. Убедитесь, что объект с таким именем существует на Canvas.");
+            }
+        }
 
         UpdateBoostCountText();
+        UpdateOlivkaCount();
     }
 
     private void Update()
     {
-
+        
         // Получаем ввод для перемещения игрока
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
@@ -61,6 +81,14 @@ public class PlayerController : MonoBehaviour
         {
             movement = movement.normalized;  // Нормализуем вектор движения, чтобы скорость была одинаковой по обеим осям
         }
+        
+        // shooting
+        if (Input.GetMouseButtonDown(0))
+        {
+            ThrowOlivka();
+        }
+        
+        
         //Debug.Log("x: " + movement.x+ " y: " + movement.y);
         if (movement.x == 0.0f && movement.y == 0.0f)
         {
@@ -73,31 +101,28 @@ public class PlayerController : MonoBehaviour
 
 
         if(movement.x==1&& movement.y==0)
+        {
             animator.SetInteger("move", 3);
+            currentShotPosition = 2;
+        }
         if (movement.x == 0 && movement.y == 1)
+        {
             animator.SetInteger("move", 1);
+            currentShotPosition = 0;
+        }
         if (movement.x == -1 && movement.y == 0)
+        {
             animator.SetInteger("move", 4);
+            currentShotPosition = 1;
+        }
         if (movement.x == 0 && movement.y == -1)
+        {
             animator.SetInteger("move", 2);
+            currentShotPosition = 0;
+        }
 
-
-        //if (movement.x >= movement.y)
-        //{
-
-        //    if (movement.x >= 0.0f)
-        //        animator.SetInteger("move", 3);
-        //    else
-        //        animator.SetInteger("move", 4);
-
-        //}
-        //else
-        //{
-        //    if (movement.y >= 0.0f)
-        //        animator.SetInteger("move", 1);
-        //    else
-        //        animator.SetInteger("move", 2);
-        //}
+        lookingAt = movement;
+        
 
     }
 
@@ -135,6 +160,24 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void UpdateOlivkaCount()
+    {
+        olivkaCountText.text = olivkaCount.ToString();
+    }
+
+    private void ThrowOlivka()
+    {
+        if(olivkaCount <= 0)
+            return;
+        
+        var newOlivka = Instantiate(olivka, shotPositions[currentShotPosition].position, Quaternion.identity);
+        var olivkaRb = newOlivka.GetComponent<Rigidbody2D>();
+        olivkaRb.AddForce(lookingAt * throwForce);
+
+        olivkaCount--;
+        UpdateOlivkaCount();
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         // Логируем столкновения
@@ -145,7 +188,7 @@ public class PlayerController : MonoBehaviour
             if (boostCount == 3)
             {
                 Debug.Log("Вы успешно покинули лабиринт!");
-                SceneManager.LoadScene("Win");  // Переход на сцену Win
+                SceneManager.LoadSceneAsync("Win");  // Переход на сцену Win
             }
             else
             {
@@ -158,17 +201,29 @@ public class PlayerController : MonoBehaviour
             AddBoost();
             Debug.Log("Буст собран");
         }
+        
     }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        // losing
+        if(other.gameObject.CompareTag("Buter"))
+        {
+            Debug.Log("Touching buter");
+            SceneManager.LoadSceneAsync("Lose");
+        }
+    }
+
     private void OnCollisionStay2D(Collision2D collision)
     {
         // Логируем столкновения в реальном времени
-        Debug.Log("OnCollisionStay2D: Столкновение с объектом " + collision.gameObject.name);
+        //Debug.Log("OnCollisionStay2D: Столкновение с объектом " + collision.gameObject.name);
 
         // Проверяем, если объект - стена
         if (collision.gameObject.CompareTag("Wall"))
         {
             // Если игрок продолжает сталкиваться со стеной, мы предотвращаем его движение
-            Debug.Log("Игрок продолжает столкновение со стеной.");
+            //Debug.Log("Игрок продолжает столкновение со стеной.");
         }
     }
 
