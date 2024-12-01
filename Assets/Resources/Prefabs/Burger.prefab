@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6162437883682315379}
   - component: {fileID: 7064356512622522381}
   - component: {fileID: 8482263917246566416}
+  - component: {fileID: 6606514582428461880}
   m_Layer: 0
   m_Name: Burger
   m_TagString: Boost
@@ -143,3 +144,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34645df8884aa8f49bddb72aacac4d7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &6606514582428461880
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1309698469386295835}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 774031f848f38fd4693c328eeb4d08cc, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

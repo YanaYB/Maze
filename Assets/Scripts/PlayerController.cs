@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
+    private Animator animator;
     // Паттерн Singleton
     public static PlayerController Instance;
 
@@ -31,6 +32,7 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         playerCollider = GetComponent<BoxCollider2D>();
 
@@ -49,14 +51,54 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+
         // Получаем ввод для перемещения игрока
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
 
-        if (movement.x != 0 && movement.y != 0)
+
+        if (movement.x != 0.0f && movement.y != 0.0f)
         {
             movement = movement.normalized;  // Нормализуем вектор движения, чтобы скорость была одинаковой по обеим осям
         }
+        //Debug.Log("x: " + movement.x+ " y: " + movement.y);
+        if (movement.x == 0.0f && movement.y == 0.0f)
+        {
+            animator.SetBool("isIdle", true);
+            animator.SetInteger("move", 0);
+            return;
+        }
+        else
+            animator.SetBool("isIdle", false);
+
+
+        if(movement.x==1&& movement.y==0)
+            animator.SetInteger("move", 3);
+        if (movement.x == 0 && movement.y == 1)
+            animator.SetInteger("move", 1);
+        if (movement.x == -1 && movement.y == 0)
+            animator.SetInteger("move", 4);
+        if (movement.x == 0 && movement.y == -1)
+            animator.SetInteger("move", 2);
+
+
+        //if (movement.x >= movement.y)
+        //{
+
+        //    if (movement.x >= 0.0f)
+        //        animator.SetInteger("move",3);
+        //    else
+        //        animator.SetInteger("move", 4);
+
+        //}
+        //else
+        //{
+        //    if (movement.y >= 0.0f)
+        //        animator.SetInteger("move", 1);
+        //    else
+        //        animator.SetInteger("move", 2);
+        //}
+       
     }
 
     private void FixedUpdate()
@@ -64,8 +106,8 @@ public class PlayerController : MonoBehaviour
         // Перемещение игрока через Rigidbody2D
         rb.velocity = movement * moveSpeed;
 
-        // Логирование состояния игрока и его скорости
-        Debug.Log("Player Velocity: " + rb.velocity);
+        
+        
     }
 
     public void AddBoost()
