@@ -86,7 +86,7 @@ public class PlayerController : MonoBehaviour
         //{
 
         //    if (movement.x >= 0.0f)
-        //        animator.SetInteger("move",3);
+        //        animator.SetInteger("move", 3);
         //    else
         //        animator.SetInteger("move", 4);
 
@@ -98,7 +98,7 @@ public class PlayerController : MonoBehaviour
         //    else
         //        animator.SetInteger("move", 2);
         //}
-       
+
     }
 
     private void FixedUpdate()
