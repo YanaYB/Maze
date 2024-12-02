@@ -186,18 +186,21 @@ public class GenerateMaze : MonoBehaviour
 
     private void CreateButer(Transform parent)
     {
-            // Случайно выбираем координаты комнаты для buter
-            int x = UnityEngine.Random.Range(0, numX);
-            int y = UnityEngine.Random.Range(0, numY);
+        // Случайно выбираем координаты комнаты для buter, кроме центра, где игрок
+        int x, y;
+        do
+        {
+            x = UnityEngine.Random.Range(0, numX);
+            y = UnityEngine.Random.Range(0, numY);
+        } while (x == numX / 2 && y == numY / 2);
             
-            // Устанавливаем buter в случайную комнату
-            Vector3 buterPosition = new Vector3(mazePosition.x + x * roomWidth, mazePosition.y + y * roomHeight, 0.0f);
-            GameObject newButer = Instantiate(buter, buterPosition, Quaternion.identity, parent);
-            newButer.name = "Buter_" + x.ToString() + "_" + y.ToString();
+        // Устанавливаем buter в случайную комнату
+        Vector3 buterPosition = new Vector3(mazePosition.x + x * roomWidth, mazePosition.y + y * roomHeight, 0.0f);
+        GameObject newButer = Instantiate(buter, buterPosition, Quaternion.identity, parent);
+        newButer.name = "Buter_" + x.ToString() + "_" + y.ToString();
 
-            var destination = newButer.GetComponent<AIDestinationSetter>();
-            destination.target = player.transform;
-            
+        var destination = newButer.GetComponent<AIDestinationSetter>();
+        destination.target = player.transform;
     }
 
     public void RemoveRoomWall(int x, int y, Room.Directions dir)

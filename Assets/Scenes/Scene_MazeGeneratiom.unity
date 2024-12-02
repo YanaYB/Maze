@@ -7226,6 +7226,7 @@ MonoBehaviour:
   - {fileID: 1309698469386295835, guid: 03e3baeac7c911b40bd0806aba58f849, type: 3}
   buter: {fileID: 2286009932679934846, guid: 62c9c369bb73ef0449f20a3fbc087240, type: 3}
   buterAmount: 10
+  newButerAmount: 5
   numX: 16
   numY: 12
   mazePosition: {x: 0, y: 0}
