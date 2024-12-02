@@ -6,10 +6,12 @@ using UnityEngine;
 
 public class Buter : MonoBehaviour
 {
+    public static int Amount;
     private void OnCollisionEnter2D(Collision2D other)
     { 
         if (other.gameObject.CompareTag("Olivka"))
         {
+            Amount--;
             // убрать и будут смешно падать
             Destroy(gameObject);
             

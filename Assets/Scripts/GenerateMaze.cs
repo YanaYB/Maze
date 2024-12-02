@@ -22,6 +22,7 @@ public class GenerateMaze : MonoBehaviour
     
     [SerializeField] private GameObject buter;
     [SerializeField] private int buterAmount = 10;
+    [SerializeField] private int newButerAmount = 5;
 
     // The grid.
     Room[,] rooms = null;
@@ -134,9 +135,18 @@ public class GenerateMaze : MonoBehaviour
         CreateBoosts();
         
         //creating buters
+        Buter.Amount = buterAmount;
         CreateButers(buterAmount);
         
-        
+    }
+
+    private void Update()
+    {
+        if (Buter.Amount == 0)
+        {
+            Buter.Amount = newButerAmount;
+            CreateButers(newButerAmount);
+        }
     }
 
     private void CreateBoosts()
